@@ -6,197 +6,256 @@
     <title>AI Dashboard for Airlines & Airports</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <header class="dashboard-header">
+    <!-- Header Section -->
+    <header class="dashboard-header">
+        <div class="container">
             <div class="header-content">
-                <h1>✈️ AI Dashboard for Airlines & Airports</h1>
-                <p>Real-time insights for aviation operations teams</p>
+                <div class="header-title">
+                    <div class="airline-icon">✈️</div>
+                    <div>
+                        <h1>AI Dashboard for Airlines & Airports</h1>
+                        <p class="header-subtitle">Smart Analytics for Flight Operations & Delay Management</p>
+                    </div>
+                </div>
+                <div class="last-updated">
+                    <span class="update-label">Last Updated:</span>
+                    <span class="update-time" id="lastUpdated"></span>
+                </div>
             </div>
-        </header>
-
-        <div class="main-layout">
-            <!-- Sidebar Filters -->
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h3>🎛️ Filters</h3>
-                </div>
-                
-                <div class="filter-group">
-                    <label class="form-label">Year</label>
-                    <select id="yearFilter" class="form-control" multiple>
-                        <option value="">All Years</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label class="form-label">Carrier/Airline</label>
-                    <select id="carrierFilter" class="form-control" multiple>
-                        <option value="">All Carriers</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label class="form-label">Airport</label>
-                    <select id="airportFilter" class="form-control" multiple>
-                        <option value="">All Airports</option>
-                    </select>
-                </div>
-
-                <div class="filter-actions">
-                    <button id="applyFilters" class="btn btn--primary btn--full-width">Apply Filters</button>
-                    <button id="resetFilters" class="btn btn--outline btn--full-width">Reset</button>
-                </div>
-
-                <div class="data-export">
-                    <button id="exportData" class="btn btn--secondary btn--full-width">📥 Export Data</button>
-                </div>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="main-content">
-                <!-- Loading Indicator -->
-                <div id="loadingIndicator" class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <p>Loading airline data...</p>
-                </div>
-
-                <!-- Tab Navigation -->
-                <nav class="tab-navigation">
-                    <button class="tab-btn active" data-tab="overview">📊 Overview</button>
-                    <button class="tab-btn" data-tab="heatmaps">🌍 Airport Heatmaps</button>
-                    <button class="tab-btn" data-tab="delays">📈 Delay Analysis</button>
-                    <button class="tab-btn" data-tab="predictive">🧠 Predictive Analytics</button>
-                    <button class="tab-btn" data-tab="performance">⚡ Performance</button>
-                </nav>
-
-                <!-- Tab Content -->
-                <div class="tab-content">
-                    <!-- Overview Tab -->
-                    <div id="overview" class="tab-panel active">
-                        <div class="metrics-grid">
-                            <div class="metric-card">
-                                <div class="metric-icon">✈️</div>
-                                <div class="metric-info">
-                                    <h3 id="totalFlights">0</h3>
-                                    <p>Total Flights</p>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon">⏱️</div>
-                                <div class="metric-info">
-                                    <h3 id="avgDelay">0 min</h3>
-                                    <p>Average Delay</p>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon">❌</div>
-                                <div class="metric-info">
-                                    <h3 id="cancellationRate">0%</h3>
-                                    <p>Cancellation Rate</p>
-                                </div>
-                            </div>
-                            <div class="metric-card">
-                                <div class="metric-icon">✅</div>
-                                <div class="metric-info">
-                                    <h3 id="onTimePerf">0%</h3>
-                                    <p>On-Time Performance</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="overview-charts">
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>Monthly Flight Volume</h4>
-                                    <canvas id="monthlyVolumeChart" width="400" height="200"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Airport Heatmaps Tab -->
-                    <div id="heatmaps" class="tab-panel">
-                        <div class="heatmap-section">
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>🏆 Busiest Airports by Flight Volume</h4>
-                                    <canvas id="busiestAirportsChart" width="400" height="300"></canvas>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>⚠️ Airports with Highest Delays</h4>
-                                    <canvas id="delayedAirportsChart" width="400" height="300"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Delay Analysis Tab -->
-                    <div id="delays" class="tab-panel">
-                        <div class="delay-analysis">
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>📊 Monthly Delay Causes Breakdown</h4>
-                                    <canvas id="delayCausesChart" width="400" height="300"></canvas>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>🔍 Delay Distribution by Type</h4>
-                                    <canvas id="delayDistributionChart" width="400" height="250"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Predictive Analytics Tab -->
-                    <div id="predictive" class="tab-panel">
-                        <div class="predictive-section">
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>🎯 Delay Risk Assessment Matrix</h4>
-                                    <canvas id="riskMatrixChart" width="400" height="300"></canvas>
-                                </div>
-                            </div>
-                            <div class="recommendations-panel">
-                                <div class="card">
-                                    <div class="card__body">
-                                        <h4>💡 Resource Allocation Recommendations</h4>
-                                        <div id="recommendationsList" class="recommendations-list">
-                                            <!-- Recommendations will be populated by JS -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Performance Analytics Tab -->
-                    <div id="performance" class="tab-panel">
-                        <div class="performance-section">
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>📈 On-Time Performance Trends</h4>
-                                    <canvas id="performanceTrendChart" width="400" height="300"></canvas>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card__body">
-                                    <h4>🏢 Carrier Performance Comparison</h4>
-                                    <canvas id="carrierComparisonChart" width="400" height="300"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
         </div>
-    </div>
+    </header>
+
+    <!-- Filter Controls Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-panel card">
+                <h3>Filter Controls</h3>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="form-label" for="yearFilter">Year</label>
+                        <select id="yearFilter" class="form-control">
+                            <option value="">All Years</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label" for="airlineFilter">Airlines</label>
+                        <select id="airlineFilter" class="form-control" multiple>
+                            <option value="AA">American Airlines</option>
+                            <option value="DL">Delta Air Lines</option>
+                            <option value="UA">United Airlines</option>
+                            <option value="WN">Southwest Airlines</option>
+                            <option value="B6">JetBlue Airways</option>
+                            <option value="AS">Alaska Airlines</option>
+                            <option value="NK">Spirit Airlines</option>
+                            <option value="F9">Frontier Airlines</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label" for="airportFilter">Airports</label>
+                        <select id="airportFilter" class="form-control" multiple>
+                            <option value="ATL">Atlanta (ATL)</option>
+                            <option value="LAX">Los Angeles (LAX)</option>
+                            <option value="ORD">Chicago O'Hare (ORD)</option>
+                            <option value="DFW">Dallas/Fort Worth (DFW)</option>
+                            <option value="JFK">JFK New York (JFK)</option>
+                            <option value="DEN">Denver (DEN)</option>
+                            <option value="SFO">San Francisco (SFO)</option>
+                            <option value="SEA">Seattle (SEA)</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label" for="monthRange">Month Range</label>
+                        <div class="month-range-container">
+                            <input type="range" id="monthRangeStart" min="1" max="12" value="1" class="month-slider">
+                            <input type="range" id="monthRangeEnd" min="1" max="12" value="12" class="month-slider">
+                            <div class="month-display">
+                                <span id="monthRangeDisplay">Jan - Dec</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <button id="resetFilters" class="btn btn--secondary">Reset Filters</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KPI Cards Section -->
+    <section class="kpi-section">
+        <div class="container">
+            <div class="kpi-grid">
+                <div class="kpi-card card" id="totalFlightsCard">
+                    <div class="kpi-icon">🛫</div>
+                    <div class="kpi-content">
+                        <h3 class="kpi-value" data-target="0">0</h3>
+                        <p class="kpi-label">Total Flights</p>
+                        <div class="kpi-trend trend-up">↗ +5.2%</div>
+                    </div>
+                </div>
+                <div class="kpi-card card" id="avgDelayCard">
+                    <div class="kpi-icon">⏱️</div>
+                    <div class="kpi-content">
+                        <h3 class="kpi-value" data-target="0">0</h3>
+                        <p class="kpi-label">Avg Delay (min)</p>
+                        <div class="kpi-trend trend-down">↘ -2.1%</div>
+                    </div>
+                </div>
+                <div class="kpi-card card" id="onTimeCard">
+                    <div class="kpi-icon">✅</div>
+                    <div class="kpi-content">
+                        <h3 class="kpi-value" data-target="0">0%</h3>
+                        <p class="kpi-label">On-Time Performance</p>
+                        <div class="kpi-progress">
+                            <div class="kpi-progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-card card" id="cancellationCard">
+                    <div class="kpi-icon">❌</div>
+                    <div class="kpi-content">
+                        <h3 class="kpi-value" data-target="0">0%</h3>
+                        <p class="kpi-label">Cancellation Rate</p>
+                        <div class="kpi-trend trend-neutral">→ 0.1%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Heatmaps Section -->
+    <section class="heatmaps-section">
+        <div class="container">
+            <div class="heatmaps-grid">
+                <div class="heatmap-container card">
+                    <h3>Busiest Airports by Month</h3>
+                    <div class="chart-container">
+                        <canvas id="busiestHeatmap"></canvas>
+                    </div>
+                    <div class="heatmap-legend">
+                        <span class="legend-label">Flight Volume:</span>
+                        <div class="legend-gradient">
+                            <span class="legend-min">Low</span>
+                            <div class="gradient-bar busiest-gradient"></div>
+                            <span class="legend-max">High</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="heatmap-container card">
+                    <h3>Most Delayed Airports by Month</h3>
+                    <div class="chart-container">
+                        <canvas id="delayedHeatmap"></canvas>
+                    </div>
+                    <div class="heatmap-legend">
+                        <span class="legend-label">Delay Ratio:</span>
+                        <div class="legend-gradient">
+                            <span class="legend-min">Low</span>
+                            <div class="gradient-bar delayed-gradient"></div>
+                            <span class="legend-max">High</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Delay Trends Chart -->
+    <section class="trends-section">
+        <div class="container">
+            <div class="trends-container card">
+                <h3>Monthly Delay Trends by Cause</h3>
+                <div class="chart-container">
+                    <canvas id="delayTrendsChart"></canvas>
+                </div>
+                <div class="trends-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #1f77b4;"></span>
+                        <span>Carrier Delays</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #2ca02c;"></span>
+                        <span>Weather Delays</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #ff7f0e;"></span>
+                        <span>NAS Delays</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #d62728;"></span>
+                        <span>Security Delays</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #9467bd;"></span>
+                        <span>Late Aircraft Delays</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Predictive Analytics Section -->
+    <section class="prediction-section">
+        <div class="container">
+            <div class="prediction-grid">
+                <div class="prediction-card card">
+                    <h3>Delay Risk Assessment</h3>
+                    <div class="risk-gauge">
+                        <div class="gauge-container">
+                            <canvas id="riskGauge" width="200" height="200"></canvas>
+                            <div class="gauge-center">
+                                <span class="risk-score" id="riskScore">0%</span>
+                                <span class="risk-label">Risk</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="risk-details">
+                        <p id="riskAssessment">Select filters to see delay risk assessment</p>
+                    </div>
+                </div>
+                <div class="prediction-card card">
+                    <h3>Resource Allocation Recommendations</h3>
+                    <div class="recommendations">
+                        <div class="recommendation-item">
+                            <div class="rec-icon">👥</div>
+                            <div class="rec-content">
+                                <h4>Staffing Levels</h4>
+                                <p id="staffingRec">Analyzing current data...</p>
+                            </div>
+                        </div>
+                        <div class="recommendation-item">
+                            <div class="rec-icon">🛫</div>
+                            <div class="rec-content">
+                                <h4>Gate Management</h4>
+                                <p id="gateRec">Optimizing gate assignments...</p>
+                            </div>
+                        </div>
+                        <div class="recommendation-item">
+                            <div class="rec-icon">📊</div>
+                            <div class="rec-content">
+                                <h4>Peak Hours Prediction</h4>
+                                <p id="peakHoursRec">Calculating peak delay periods...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>Data Source: Flight Delay Prediction System | Last Updated: <span id="footerTimestamp"></span></p>
+                <p>© 2024 AI Dashboard for Airlines & Airports. Built for operational excellence.</p>
+            </div>
+        </div>
+    </footer>
 
     <script src="app.js"></script>
 </body>

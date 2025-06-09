@@ -1,219 +1,388 @@
-// Global variables
-let airlineData = [];
+// AI Dashboard for Airlines & Airports - JavaScript
+
+// Global data and state
+let flightData = [];
 let filteredData = [];
 let charts = {};
 
-// Chart colors for consistent styling
-const chartColors = ['#1FB8CD', '#FFC185', '#B4413C', '#ECEBD5', '#5D878F', '#DB4545', '#D2BA4C', '#964325', '#944454', '#13343B'];
+// Sample flight data (embedded for demo)
+const sampleFlightData = [
+    {"year": 2023, "month": 1, "airport": "ATL", "airport_name": "Hartsfield-Jackson Atlanta International", "carrier": "AA", "carrier_name": "American Airlines", "arr_flights": 1687, "arr_cancelled": 8, "arr_diverted": 0, "arr_del15": 488, "arr_delay": 14893.77, "carrier_delay": 209, "weather_delay": 80, "nas_delay": 140, "security_delay": 14, "late_aircraft_delay": 45, "delay_ratio": 0.2893},
+    {"year": 2023, "month": 1, "airport": "ATL", "airport_name": "Hartsfield-Jackson Atlanta International", "carrier": "DL", "carrier_name": "Delta Air Lines", "arr_flights": 1748, "arr_cancelled": 28, "arr_diverted": 8, "arr_del15": 453, "arr_delay": 8875.55, "carrier_delay": 42, "weather_delay": 161, "nas_delay": 231, "security_delay": 2, "late_aircraft_delay": 17, "delay_ratio": 0.2592},
+    {"year": 2023, "month": 6, "airport": "LAX", "airport_name": "Los Angeles International", "carrier": "UA", "carrier_name": "United Airlines", "arr_flights": 2245, "arr_cancelled": 15, "arr_diverted": 3, "arr_del15": 687, "arr_delay": 18234.56, "carrier_delay": 156, "weather_delay": 89, "nas_delay": 298, "security_delay": 8, "late_aircraft_delay": 136, "delay_ratio": 0.3061},
+    {"year": 2023, "month": 12, "airport": "ORD", "airport_name": "Chicago O'Hare International", "carrier": "WN", "carrier_name": "Southwest Airlines", "arr_flights": 1892, "arr_cancelled": 22, "arr_diverted": 4, "arr_del15": 543, "arr_delay": 15789.33, "carrier_delay": 134, "weather_delay": 198, "nas_delay": 156, "security_delay": 12, "late_aircraft_delay": 43, "delay_ratio": 0.2870},
+    {"year": 2024, "month": 3, "airport": "DFW", "airport_name": "Dallas/Fort Worth International", "carrier": "AA", "carrier_name": "American Airlines", "arr_flights": 1734, "arr_cancelled": 18, "arr_diverted": 2, "arr_del15": 478, "arr_delay": 13567.89, "carrier_delay": 123, "weather_delay": 67, "nas_delay": 189, "security_delay": 6, "late_aircraft_delay": 93, "delay_ratio": 0.2757},
+    {"year": 2024, "month": 7, "airport": "JFK", "airport_name": "John F. Kennedy International", "carrier": "B6", "carrier_name": "JetBlue Airways", "arr_flights": 2156, "arr_cancelled": 31, "arr_diverted": 7, "arr_del15": 612, "arr_delay": 17234.12, "carrier_delay": 167, "weather_delay": 134, "nas_delay": 213, "security_delay": 11, "late_aircraft_delay": 87, "delay_ratio": 0.2840},
+    // Additional synthetic data for better visualization
+    {"year": 2023, "month": 2, "airport": "LAX", "airport_name": "Los Angeles International", "carrier": "DL", "carrier_name": "Delta Air Lines", "arr_flights": 1956, "arr_cancelled": 12, "arr_diverted": 2, "arr_del15": 523, "arr_delay": 12456.78, "carrier_delay": 145, "weather_delay": 76, "nas_delay": 187, "security_delay": 9, "late_aircraft_delay": 106, "delay_ratio": 0.2674},
+    {"year": 2023, "month": 3, "airport": "ORD", "airport_name": "Chicago O'Hare International", "carrier": "AA", "carrier_name": "American Airlines", "arr_flights": 1823, "arr_cancelled": 19, "arr_diverted": 5, "arr_del15": 567, "arr_delay": 16789.23, "carrier_delay": 156, "weather_delay": 123, "nas_delay": 198, "security_delay": 15, "late_aircraft_delay": 75, "delay_ratio": 0.3111},
+    {"year": 2023, "month": 4, "airport": "DFW", "airport_name": "Dallas/Fort Worth International", "carrier": "WN", "carrier_name": "Southwest Airlines", "arr_flights": 2034, "arr_cancelled": 16, "arr_diverted": 3, "arr_del15": 589, "arr_delay": 14567.45, "carrier_delay": 134, "weather_delay": 98, "nas_delay": 234, "security_delay": 7, "late_aircraft_delay": 116, "delay_ratio": 0.2895},
+    {"year": 2023, "month": 5, "airport": "JFK", "airport_name": "John F. Kennedy International", "carrier": "AA", "carrier_name": "American Airlines", "arr_flights": 1765, "arr_cancelled": 23, "arr_diverted": 6, "arr_del15": 456, "arr_delay": 11234.67, "carrier_delay": 112, "weather_delay": 89, "nas_delay": 167, "security_delay": 12, "late_aircraft_delay": 76, "delay_ratio": 0.2584},
+    {"year": 2024, "month": 8, "airport": "ATL", "airport_name": "Hartsfield-Jackson Atlanta International", "carrier": "DL", "carrier_name": "Delta Air Lines", "arr_flights": 2134, "arr_cancelled": 14, "arr_diverted": 3, "arr_del15": 623, "arr_delay": 15678.90, "carrier_delay": 178, "weather_delay": 145, "nas_delay": 189, "security_delay": 8, "late_aircraft_delay": 103, "delay_ratio": 0.2920},
+    {"year": 2024, "month": 9, "airport": "LAX", "airport_name": "Los Angeles International", "carrier": "UA", "carrier_name": "United Airlines", "arr_flights": 1987, "arr_cancelled": 11, "arr_diverted": 2, "arr_del15": 534, "arr_delay": 13245.67, "carrier_delay": 134, "weather_delay": 67, "nas_delay": 201, "security_delay": 6, "late_aircraft_delay": 126, "delay_ratio": 0.2688}
+];
+
+// Month names for display
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
     initializeDashboard();
+    loadFlightData();
+    setupEventListeners();
+    updateTimestamps();
 });
 
-async function initializeDashboard() {
-    try {
-        showLoading(true);
-        await loadAirlineData();
-        populateFilters();
-        initializeTabs();
-        initializeCharts();
-        updateDashboard();
-        showLoading(false);
-    } catch (error) {
-        console.error('Error initializing dashboard:', error);
-        showError('Failed to load airline data. Please try again.');
-        showLoading(false);
-    }
-}
-
-async function loadAirlineData() {
-    try {
-        const response = await fetch('https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/0aa417f4006bbb37265263ceedcf3392/823de227-2367-43c4-bb33-f3108377a6ff/40be57e5.csv');
-        const csvText = await response.text();
-        airlineData = parseCSV(csvText);
-        filteredData = [...airlineData];
-        console.log('Loaded', airlineData.length, 'records');
-    } catch (error) {
-        throw new Error('Failed to fetch airline data: ' + error.message);
-    }
-}
-
-function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-    const data = [];
+function initializeDashboard() {
+    console.log('Initializing AI Dashboard...');
     
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',');
-        if (values.length >= headers.length) {
-            const row = {};
-            headers.forEach((header, index) => {
-                const value = values[index]?.trim() || '';
-                // Convert numeric fields
-                if (['year', 'month', 'carrier_delay', 'weather_delay', 'nas_delay', 'security_delay', 'late_aircraft_delay', 'arr_flights', 'arr_cancelled', 'arr_diverted', 'arr_del15', 'arr_delay', 'delay_ratio'].includes(header)) {
-                    row[header] = parseFloat(value) || 0;
-                } else {
-                    row[header] = value;
-                }
-            });
-            data.push(row);
-        }
-    }
-    return data;
+    // Set initial filter values
+    filteredData = [...sampleFlightData];
+    
+    // Update month range display
+    updateMonthRangeDisplay();
+    
+    // Create initial charts and KPIs with delay
+    setTimeout(() => {
+        updateDashboard();
+    }, 500);
 }
 
-function populateFilters() {
-    // Populate year filter
-    const years = [...new Set(airlineData.map(d => d.year))].sort();
-    const yearSelect = document.getElementById('yearFilter');
-    years.forEach(year => {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-    });
+function loadFlightData() {
+    // In a real application, this would fetch from an API
+    flightData = [...sampleFlightData];
+    filteredData = [...flightData];
+    
+    console.log('Flight data loaded:', flightData.length, 'records');
+}
 
-    // Populate carrier filter
-    const carriers = [...new Set(airlineData.map(d => d.carrier))].sort();
-    const carrierSelect = document.getElementById('carrierFilter');
-    carriers.forEach(carrier => {
-        const option = document.createElement('option');
-        option.value = carrier;
-        option.textContent = carrier;
-        carrierSelect.appendChild(option);
-    });
-
-    // Populate airport filter
-    const airports = [...new Set(airlineData.map(d => d.airport))].sort();
-    const airportSelect = document.getElementById('airportFilter');
-    airports.forEach(airport => {
-        const option = document.createElement('option');
-        option.value = airport;
-        option.textContent = airport;
-        airportSelect.appendChild(option);
-    });
-
-    // Add event listeners
-    document.getElementById('applyFilters').addEventListener('click', applyFilters);
+function setupEventListeners() {
+    // Filter controls
+    document.getElementById('yearFilter').addEventListener('change', applyFilters);
+    document.getElementById('airlineFilter').addEventListener('change', applyFilters);
+    document.getElementById('airportFilter').addEventListener('change', applyFilters);
+    document.getElementById('monthRangeStart').addEventListener('input', updateMonthRange);
+    document.getElementById('monthRangeEnd').addEventListener('input', updateMonthRange);
     document.getElementById('resetFilters').addEventListener('click', resetFilters);
-    document.getElementById('exportData').addEventListener('click', exportData);
+    
+    // Add export functionality
+    addExportFunctionality();
 }
 
-function initializeTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanels = document.querySelectorAll('.tab-panel');
+function addExportFunctionality() {
+    // Add export buttons if they don't exist
+    const filterPanel = document.querySelector('.filter-panel .filter-grid');
+    if (filterPanel && !document.getElementById('exportBtn')) {
+        const exportGroup = document.createElement('div');
+        exportGroup.className = 'filter-group';
+        exportGroup.innerHTML = `
+            <button id="exportBtn" class="btn btn--primary">Export Data</button>
+            <button id="saveInsightsBtn" class="btn btn--secondary">Save Insights</button>
+        `;
+        filterPanel.appendChild(exportGroup);
+        
+        // Add event listeners
+        document.getElementById('exportBtn').addEventListener('click', exportData);
+        document.getElementById('saveInsightsBtn').addEventListener('click', saveInsights);
+    }
+}
 
-    tabButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetTab = button.getAttribute('data-tab');
-            console.log('Switching to tab:', targetTab); // Debug logging
-            
-            // Remove active class from all tabs and panels
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanels.forEach(panel => panel.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding panel
-            button.classList.add('active');
-            const targetPanel = document.getElementById(targetTab);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            } else {
-                console.error('Panel not found for tab:', targetTab);
-            }
+function exportData() {
+    const csvContent = convertToCSV(filteredData);
+    downloadCSV(csvContent, 'flight_data_export.csv');
+}
+
+function saveInsights() {
+    const insights = generateInsights();
+    downloadText(insights, 'flight_insights.txt');
+}
+
+function convertToCSV(data) {
+    if (data.length === 0) return '';
+    
+    const headers = Object.keys(data[0]);
+    const csvRows = [headers.join(',')];
+    
+    data.forEach(row => {
+        const values = headers.map(header => {
+            const value = row[header];
+            return typeof value === 'string' ? `"${value}"` : value;
         });
+        csvRows.push(values.join(','));
     });
+    
+    return csvRows.join('\n');
+}
+
+function generateInsights() {
+    const totalFlights = filteredData.reduce((sum, record) => sum + record.arr_flights, 0);
+    const avgDelayRatio = filteredData.reduce((sum, record) => sum + record.delay_ratio, 0) / filteredData.length;
+    const topDelayedAirport = getTopDelayedAirport();
+    const riskScore = calculateRiskScore();
+    
+    return `Flight Operations Insights Report
+Generated: ${new Date().toLocaleString()}
+
+Summary:
+- Total Flights Analyzed: ${totalFlights.toLocaleString()}
+- Average Delay Ratio: ${(avgDelayRatio * 100).toFixed(1)}%
+- Most Delayed Airport: ${topDelayedAirport}
+- Risk Score: ${riskScore}%
+
+Recommendations:
+${getRecommendationText(riskScore)}
+`;
+}
+
+function getTopDelayedAirport() {
+    const airportDelays = {};
+    filteredData.forEach(record => {
+        if (!airportDelays[record.airport]) {
+            airportDelays[record.airport] = { totalDelay: 0, count: 0 };
+        }
+        airportDelays[record.airport].totalDelay += record.delay_ratio;
+        airportDelays[record.airport].count++;
+    });
+    
+    let topAirport = '';
+    let highestDelay = 0;
+    
+    Object.keys(airportDelays).forEach(airport => {
+        const avgDelay = airportDelays[airport].totalDelay / airportDelays[airport].count;
+        if (avgDelay > highestDelay) {
+            highestDelay = avgDelay;
+            topAirport = airport;
+        }
+    });
+    
+    return topAirport;
+}
+
+function getRecommendationText(riskScore) {
+    if (riskScore < 30) {
+        return '- Normal operations, focus on optimization\n- Continue current resource allocation\n- Monitor for improvement opportunities';
+    } else if (riskScore < 70) {
+        return '- Increase monitoring frequency\n- Prepare contingency resources\n- Review peak hour staffing';
+    } else {
+        return '- Implement immediate delay management protocols\n- Deploy additional resources\n- Activate emergency response procedures';
+    }
+}
+
+function downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function downloadText(content, filename) {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function updateMonthRange() {
+    updateMonthRangeDisplay();
+    applyFilters();
+}
+
+function updateMonthRangeDisplay() {
+    const startMonth = parseInt(document.getElementById('monthRangeStart').value);
+    const endMonth = parseInt(document.getElementById('monthRangeEnd').value);
+    
+    // Ensure start is not greater than end
+    if (startMonth > endMonth) {
+        document.getElementById('monthRangeEnd').value = startMonth;
+    }
+    
+    const startName = monthNames[startMonth - 1];
+    const endName = monthNames[Math.max(startMonth, endMonth) - 1];
+    
+    document.getElementById('monthRangeDisplay').textContent = 
+        startMonth === endMonth ? startName : `${startName} - ${endName}`;
 }
 
 function applyFilters() {
-    const yearFilter = Array.from(document.getElementById('yearFilter').selectedOptions).map(o => parseInt(o.value)).filter(v => !isNaN(v));
-    const carrierFilter = Array.from(document.getElementById('carrierFilter').selectedOptions).map(o => o.value).filter(v => v !== '');
-    const airportFilter = Array.from(document.getElementById('airportFilter').selectedOptions).map(o => o.value).filter(v => v !== '');
-
-    filteredData = airlineData.filter(record => {
-        return (yearFilter.length === 0 || yearFilter.includes(record.year)) &&
-               (carrierFilter.length === 0 || carrierFilter.includes(record.carrier)) &&
-               (airportFilter.length === 0 || airportFilter.includes(record.airport));
+    const yearFilter = document.getElementById('yearFilter').value;
+    const airlineFilter = Array.from(document.getElementById('airlineFilter').selectedOptions).map(option => option.value);
+    const airportFilter = Array.from(document.getElementById('airportFilter').selectedOptions).map(option => option.value);
+    const monthStart = parseInt(document.getElementById('monthRangeStart').value);
+    const monthEnd = parseInt(document.getElementById('monthRangeEnd').value);
+    
+    filteredData = flightData.filter(record => {
+        if (yearFilter && record.year.toString() !== yearFilter) return false;
+        if (airlineFilter.length && !airlineFilter.includes(record.carrier)) return false;
+        if (airportFilter.length && !airportFilter.includes(record.airport)) return false;
+        if (record.month < monthStart || record.month > monthEnd) return false;
+        return true;
     });
-
+    
+    console.log('Filters applied. Records:', filteredData.length);
+    updateFilterDisplay();
     updateDashboard();
+}
+
+function updateFilterDisplay() {
+    // Update filter display indicators
+    const yearFilter = document.getElementById('yearFilter');
+    const airlineFilter = document.getElementById('airlineFilter');
+    const airportFilter = document.getElementById('airportFilter');
+    
+    // Add visual indicators for active filters
+    updateFilterIndicator(yearFilter, yearFilter.value);
+    updateFilterIndicator(airlineFilter, airlineFilter.selectedOptions.length > 0);
+    updateFilterIndicator(airportFilter, airportFilter.selectedOptions.length > 0);
+}
+
+function updateFilterIndicator(element, hasSelection) {
+    if (hasSelection) {
+        element.style.borderColor = '#21808d';
+        element.style.backgroundColor = '#f0f9fa';
+    } else {
+        element.style.borderColor = '';
+        element.style.backgroundColor = '';
+    }
 }
 
 function resetFilters() {
-    document.getElementById('yearFilter').selectedIndex = -1;
-    document.getElementById('carrierFilter').selectedIndex = -1;
-    document.getElementById('airportFilter').selectedIndex = -1;
-    filteredData = [...airlineData];
-    updateDashboard();
+    document.getElementById('yearFilter').value = '';
+    
+    // Clear multi-select options
+    const airlineSelect = document.getElementById('airlineFilter');
+    const airportSelect = document.getElementById('airportFilter');
+    
+    for (let option of airlineSelect.options) {
+        option.selected = false;
+    }
+    
+    for (let option of airportSelect.options) {
+        option.selected = false;
+    }
+    
+    document.getElementById('monthRangeStart').value = 1;
+    document.getElementById('monthRangeEnd').value = 12;
+    
+    updateMonthRangeDisplay();
+    applyFilters();
 }
 
 function updateDashboard() {
-    updateMetrics();
-    updateAllCharts();
-    updateRecommendations();
+    updateKPIs();
+    updateHeatmaps();
+    updateDelayTrends();
+    updatePredictiveAnalytics();
 }
 
-function updateMetrics() {
-    const totalFlights = filteredData.reduce((sum, d) => sum + d.arr_flights, 0);
-    const totalDelay = filteredData.reduce((sum, d) => sum + (d.arr_delay || 0), 0);
-    const totalCancelled = filteredData.reduce((sum, d) => sum + d.arr_cancelled, 0);
-    const totalDelayed = filteredData.reduce((sum, d) => sum + d.arr_del15, 0);
-
-    const avgDelay = totalFlights > 0 ? (totalDelay / totalFlights).toFixed(1) : 0;
+function updateKPIs() {
+    if (filteredData.length === 0) {
+        setKPIValues(0, 0, 0, 0);
+        return;
+    }
+    
+    const totalFlights = filteredData.reduce((sum, record) => sum + record.arr_flights, 0);
+    const totalDelayMinutes = filteredData.reduce((sum, record) => sum + record.arr_delay, 0);
+    const totalDelayedFlights = filteredData.reduce((sum, record) => sum + record.arr_del15, 0);
+    const totalCancelled = filteredData.reduce((sum, record) => sum + record.arr_cancelled, 0);
+    
+    const avgDelay = totalFlights > 0 ? Math.round(totalDelayMinutes / totalFlights) : 0;
+    const onTimePerformance = totalFlights > 0 ? Math.round(((totalFlights - totalDelayedFlights) / totalFlights) * 100) : 0;
     const cancellationRate = totalFlights > 0 ? ((totalCancelled / totalFlights) * 100).toFixed(1) : 0;
-    const onTimePerf = totalFlights > 0 ? (((totalFlights - totalDelayed) / totalFlights) * 100).toFixed(1) : 0;
-
-    document.getElementById('totalFlights').textContent = totalFlights.toLocaleString();
-    document.getElementById('avgDelay').textContent = `${avgDelay} min`;
-    document.getElementById('cancellationRate').textContent = `${cancellationRate}%`;
-    document.getElementById('onTimePerf').textContent = `${onTimePerf}%`;
+    
+    setKPIValues(totalFlights, avgDelay, onTimePerformance, cancellationRate);
 }
 
-function initializeCharts() {
-    // Initialize all charts with empty data
-    createMonthlyVolumeChart();
-    createBusiestAirportsChart();
-    createDelayedAirportsChart();
-    createDelayCausesChart();
-    createDelayDistributionChart();
-    createRiskMatrixChart();
-    createPerformanceTrendChart();
-    createCarrierComparisonChart();
+function setKPIValues(totalFlights, avgDelay, onTimePerformance, cancellationRate) {
+    // Animate counter for total flights
+    animateCounter('totalFlightsCard', totalFlights, 0);
+    
+    // Animate counter for average delay
+    animateCounter('avgDelayCard', avgDelay, 0);
+    
+    // Animate counter for on-time performance
+    animateCounter('onTimeCard', onTimePerformance, 0, '%');
+    
+    // Update progress bar for on-time performance
+    const progressBar = document.querySelector('#onTimeCard .kpi-progress-bar');
+    if (progressBar) {
+        setTimeout(() => {
+            progressBar.style.width = onTimePerformance + '%';
+        }, 500);
+    }
+    
+    // Animate counter for cancellation rate
+    animateCounter('cancellationCard', parseFloat(cancellationRate), 1, '%');
 }
 
-function updateAllCharts() {
-    updateMonthlyVolumeChart();
-    updateBusiestAirportsChart();
-    updateDelayedAirportsChart();
-    updateDelayCausesChart();
-    updateDelayDistributionChart();
-    updateRiskMatrixChart();
-    updatePerformanceTrendChart();
-    updateCarrierComparisonChart();
+function animateCounter(cardId, target, decimals = 0, suffix = '') {
+    const card = document.getElementById(cardId);
+    const valueElement = card.querySelector('.kpi-value');
+    const duration = 2000;
+    const startTime = performance.now();
+    const startValue = 0;
+    
+    function updateCounter(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentValue = startValue + (target - startValue) * easeOut;
+        
+        valueElement.textContent = currentValue.toFixed(decimals) + suffix;
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+        }
+    }
+    
+    requestAnimationFrame(updateCounter);
 }
 
-function createMonthlyVolumeChart() {
-    const ctx = document.getElementById('monthlyVolumeChart').getContext('2d');
-    charts.monthlyVolume = new Chart(ctx, {
-        type: 'line',
+function updateHeatmaps() {
+    updateBusiestAirportsHeatmap();
+    updateDelayedAirportsHeatmap();
+}
+
+function updateBusiestAirportsHeatmap() {
+    const ctx = document.getElementById('busiestHeatmap').getContext('2d');
+    
+    if (charts.busiestHeatmap) {
+        charts.busiestHeatmap.destroy();
+    }
+    
+    // Simple bar chart for airport traffic
+    const airportData = aggregateByAirport(filteredData, 'arr_flights');
+    
+    charts.busiestHeatmap = new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: [],
+            labels: airportData.labels,
             datasets: [{
-                label: 'Flight Volume',
-                data: [],
-                borderColor: chartColors[0],
-                backgroundColor: chartColors[0] + '20',
-                tension: 0.4,
-                fill: true
+                label: 'Total Flights',
+                data: airportData.data,
+                backgroundColor: '#1FB8CD',
+                borderColor: '#1FB8CD',
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
+                legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Flights: ${context.parsed.y.toLocaleString()}`;
+                        }
+                    }
                 }
             },
             scales: {
@@ -227,180 +396,154 @@ function createMonthlyVolumeChart() {
                 x: {
                     title: {
                         display: true,
-                        text: 'Month'
+                        text: 'Airport'
                     }
                 }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
             }
         }
     });
 }
 
-function updateMonthlyVolumeChart() {
-    const monthlyData = {};
-    filteredData.forEach(d => {
-        const key = `${d.year}-${d.month.toString().padStart(2, '0')}`;
-        monthlyData[key] = (monthlyData[key] || 0) + d.arr_flights;
-    });
-
-    const sortedKeys = Object.keys(monthlyData).sort();
-    const labels = sortedKeys.map(key => {
-        const [year, month] = key.split('-');
-        return `${year}-${month}`;
-    });
-    const data = sortedKeys.map(key => monthlyData[key]);
-
-    charts.monthlyVolume.data.labels = labels;
-    charts.monthlyVolume.data.datasets[0].data = data;
-    charts.monthlyVolume.update();
-}
-
-function createBusiestAirportsChart() {
-    const ctx = document.getElementById('busiestAirportsChart').getContext('2d');
-    charts.busiestAirports = new Chart(ctx, {
+function updateDelayedAirportsHeatmap() {
+    const ctx = document.getElementById('delayedHeatmap').getContext('2d');
+    
+    if (charts.delayedHeatmap) {
+        charts.delayedHeatmap.destroy();
+    }
+    
+    // Simple bar chart for delay ratios
+    const delayData = aggregateByAirport(filteredData, 'delay_ratio');
+    
+    charts.delayedHeatmap = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [],
+            labels: delayData.labels,
             datasets: [{
-                label: 'Total Flights',
-                data: [],
-                backgroundColor: chartColors.slice(0, 10)
+                label: 'Delay Ratio',
+                data: delayData.data.map(d => d * 100), // Convert to percentage
+                backgroundColor: '#FFC185',
+                borderColor: '#FFC185',
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            indexAxis: 'y',
             plugins: {
-                title: {
+                legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Delay Ratio: ${context.parsed.y.toFixed(1)}%`;
+                        }
+                    }
                 }
             },
             scales: {
-                x: {
+                y: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Number of Flights'
+                        text: 'Delay Ratio (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Airport'
                     }
                 }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
             }
         }
     });
 }
 
-function updateBusiestAirportsChart() {
+function aggregateByAirport(data, metric) {
     const airportData = {};
-    filteredData.forEach(d => {
-        airportData[d.airport] = (airportData[d.airport] || 0) + d.arr_flights;
-    });
-
-    const sortedAirports = Object.entries(airportData)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 10);
-
-    charts.busiestAirports.data.labels = sortedAirports.map(([airport]) => airport);
-    charts.busiestAirports.data.datasets[0].data = sortedAirports.map(([,flights]) => flights);
-    charts.busiestAirports.update();
-}
-
-function createDelayedAirportsChart() {
-    const ctx = document.getElementById('delayedAirportsChart').getContext('2d');
-    charts.delayedAirports = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Average Delay (minutes)',
-                data: [],
-                backgroundColor: chartColors[1]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            plugins: {
-                title: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Average Delay (minutes)'
-                    }
-                }
-            }
+    
+    data.forEach(record => {
+        if (!airportData[record.airport]) {
+            airportData[record.airport] = { values: [], count: 0 };
         }
+        airportData[record.airport].values.push(record[metric]);
+        airportData[record.airport].count++;
     });
+    
+    const labels = Object.keys(airportData);
+    const aggregatedData = labels.map(airport => {
+        const values = airportData[airport].values;
+        return metric === 'delay_ratio' 
+            ? values.reduce((a, b) => a + b, 0) / values.length
+            : values.reduce((a, b) => a + b, 0);
+    });
+    
+    return { labels, data: aggregatedData };
 }
 
-function updateDelayedAirportsChart() {
-    const airportDelays = {};
-    const airportFlights = {};
-
-    filteredData.forEach(d => {
-        if (!airportDelays[d.airport]) {
-            airportDelays[d.airport] = 0;
-            airportFlights[d.airport] = 0;
-        }
-        airportDelays[d.airport] += d.arr_delay || 0;
-        airportFlights[d.airport] += d.arr_flights;
-    });
-
-    const avgDelays = Object.entries(airportDelays).map(([airport, totalDelay]) => [
-        airport,
-        airportFlights[airport] > 0 ? totalDelay / airportFlights[airport] : 0
-    ]).sort(([,a], [,b]) => b - a).slice(0, 10);
-
-    charts.delayedAirports.data.labels = avgDelays.map(([airport]) => airport);
-    charts.delayedAirports.data.datasets[0].data = avgDelays.map(([,delay]) => delay.toFixed(1));
-    charts.delayedAirports.update();
-}
-
-function createDelayCausesChart() {
-    const ctx = document.getElementById('delayCausesChart').getContext('2d');
-    charts.delayCauses = new Chart(ctx, {
+function updateDelayTrends() {
+    const ctx = document.getElementById('delayTrendsChart').getContext('2d');
+    
+    if (charts.delayTrends) {
+        charts.delayTrends.destroy();
+    }
+    
+    // Aggregate delay data by month and cause
+    const trendData = aggregateDelayTrends(filteredData);
+    
+    charts.delayTrends = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [],
+            labels: trendData.months,
             datasets: [
                 {
-                    label: 'Carrier Delay',
-                    data: [],
-                    borderColor: chartColors[0],
-                    backgroundColor: chartColors[0] + '20',
-                    tension: 0.4
+                    label: 'Carrier Delays',
+                    data: trendData.carrier_delay,
+                    borderColor: '#1f77b4',
+                    backgroundColor: 'rgba(31, 119, 180, 0.1)',
+                    tension: 0.4,
+                    fill: false
                 },
                 {
-                    label: 'Weather Delay',
-                    data: [],
-                    borderColor: chartColors[1],
-                    backgroundColor: chartColors[1] + '20',
-                    tension: 0.4
+                    label: 'Weather Delays',
+                    data: trendData.weather_delay,
+                    borderColor: '#2ca02c',
+                    backgroundColor: 'rgba(44, 160, 44, 0.1)',
+                    tension: 0.4,
+                    fill: false
                 },
                 {
-                    label: 'NAS Delay',
-                    data: [],
-                    borderColor: chartColors[2],
-                    backgroundColor: chartColors[2] + '20',
-                    tension: 0.4
+                    label: 'NAS Delays',
+                    data: trendData.nas_delay,
+                    borderColor: '#ff7f0e',
+                    backgroundColor: 'rgba(255, 127, 14, 0.1)',
+                    tension: 0.4,
+                    fill: false
                 },
                 {
-                    label: 'Security Delay',
-                    data: [],
-                    borderColor: chartColors[3],
-                    backgroundColor: chartColors[3] + '20',
-                    tension: 0.4
+                    label: 'Security Delays',
+                    data: trendData.security_delay,
+                    borderColor: '#d62728',
+                    backgroundColor: 'rgba(214, 39, 40, 0.1)',
+                    tension: 0.4,
+                    fill: false
                 },
                 {
-                    label: 'Late Aircraft',
-                    data: [],
-                    borderColor: chartColors[4],
-                    backgroundColor: chartColors[4] + '20',
-                    tension: 0.4
+                    label: 'Late Aircraft Delays',
+                    data: trendData.late_aircraft_delay,
+                    borderColor: '#9467bd',
+                    backgroundColor: 'rgba(148, 103, 189, 0.1)',
+                    tension: 0.4,
+                    fill: false
                 }
             ]
         },
@@ -408,416 +551,193 @@ function createDelayCausesChart() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Total Delay Minutes'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Month'
-                    }
-                }
-            }
-        }
-    });
-}
-
-function updateDelayCausesChart() {
-    const monthlyDelays = {};
-
-    filteredData.forEach(d => {
-        const key = `${d.year}-${d.month.toString().padStart(2, '0')}`;
-        if (!monthlyDelays[key]) {
-            monthlyDelays[key] = {
-                carrier: 0,
-                weather: 0,
-                nas: 0,
-                security: 0,
-                late_aircraft: 0
-            };
-        }
-        monthlyDelays[key].carrier += d.carrier_delay || 0;
-        monthlyDelays[key].weather += d.weather_delay || 0;
-        monthlyDelays[key].nas += d.nas_delay || 0;
-        monthlyDelays[key].security += d.security_delay || 0;
-        monthlyDelays[key].late_aircraft += d.late_aircraft_delay || 0;
-    });
-
-    const sortedKeys = Object.keys(monthlyDelays).sort();
-    const labels = sortedKeys.map(key => {
-        const [year, month] = key.split('-');
-        return `${year}-${month}`;
-    });
-
-    charts.delayCauses.data.labels = labels;
-    charts.delayCauses.data.datasets[0].data = sortedKeys.map(key => monthlyDelays[key].carrier);
-    charts.delayCauses.data.datasets[1].data = sortedKeys.map(key => monthlyDelays[key].weather);
-    charts.delayCauses.data.datasets[2].data = sortedKeys.map(key => monthlyDelays[key].nas);
-    charts.delayCauses.data.datasets[3].data = sortedKeys.map(key => monthlyDelays[key].security);
-    charts.delayCauses.data.datasets[4].data = sortedKeys.map(key => monthlyDelays[key].late_aircraft);
-    charts.delayCauses.update();
-}
-
-function createDelayDistributionChart() {
-    const ctx = document.getElementById('delayDistributionChart').getContext('2d');
-    charts.delayDistribution = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Carrier Delay', 'Weather Delay', 'NAS Delay', 'Security Delay', 'Late Aircraft'],
-            datasets: [{
-                data: [],
-                backgroundColor: chartColors.slice(0, 5)
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: false
-                }
-            }
-        }
-    });
-}
-
-function updateDelayDistributionChart() {
-    const totalDelays = {
-        carrier: filteredData.reduce((sum, d) => sum + (d.carrier_delay || 0), 0),
-        weather: filteredData.reduce((sum, d) => sum + (d.weather_delay || 0), 0),
-        nas: filteredData.reduce((sum, d) => sum + (d.nas_delay || 0), 0),
-        security: filteredData.reduce((sum, d) => sum + (d.security_delay || 0), 0),
-        late_aircraft: filteredData.reduce((sum, d) => sum + (d.late_aircraft_delay || 0), 0)
-    };
-
-    charts.delayDistribution.data.datasets[0].data = [
-        totalDelays.carrier,
-        totalDelays.weather,
-        totalDelays.nas,
-        totalDelays.security,
-        totalDelays.late_aircraft
-    ];
-    charts.delayDistribution.update();
-}
-
-function createRiskMatrixChart() {
-    const ctx = document.getElementById('riskMatrixChart').getContext('2d');
-    charts.riskMatrix = new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Airport Risk',
-                data: [],
-                backgroundColor: chartColors[0] + '80',
-                borderColor: chartColors[0]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: false
+                legend: {
+                    display: true,
+                    position: 'top'
                 },
                 tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `Airport: ${context.raw.airport}, Risk Score: ${context.parsed.y.toFixed(2)}`;
-                        }
-                    }
+                    mode: 'index',
+                    intersect: false
                 }
             },
             scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Flight Volume'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Delay Risk Score'
-                    }
-                }
-            }
-        }
-    });
-}
-
-function updateRiskMatrixChart() {
-    const airportRisk = {};
-
-    filteredData.forEach(d => {
-        if (!airportRisk[d.airport]) {
-            airportRisk[d.airport] = {
-                flights: 0,
-                delays: 0,
-                totalDelay: 0
-            };
-        }
-        airportRisk[d.airport].flights += d.arr_flights;
-        airportRisk[d.airport].delays += d.arr_del15;
-        airportRisk[d.airport].totalDelay += d.arr_delay || 0;
-    });
-
-    const riskData = Object.entries(airportRisk).map(([airport, data]) => {
-        const delayRate = data.flights > 0 ? data.delays / data.flights : 0;
-        const avgDelay = data.flights > 0 ? data.totalDelay / data.flights : 0;
-        const riskScore = delayRate * avgDelay;
-        
-        return {
-            x: data.flights,
-            y: riskScore,
-            airport: airport
-        };
-    });
-
-    charts.riskMatrix.data.datasets[0].data = riskData;
-    charts.riskMatrix.update();
-}
-
-function createPerformanceTrendChart() {
-    const ctx = document.getElementById('performanceTrendChart').getContext('2d');
-    charts.performanceTrend = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'On-Time Performance (%)',
-                data: [],
-                borderColor: chartColors[0],
-                backgroundColor: chartColors[0] + '20',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'On-Time Performance (%)'
-                    }
-                },
                 x: {
                     title: {
                         display: true,
                         text: 'Month'
                     }
-                }
-            }
-        }
-    });
-}
-
-function updatePerformanceTrendChart() {
-    const monthlyPerf = {};
-
-    filteredData.forEach(d => {
-        const key = `${d.year}-${d.month.toString().padStart(2, '0')}`;
-        if (!monthlyPerf[key]) {
-            monthlyPerf[key] = {
-                total: 0,
-                onTime: 0
-            };
-        }
-        monthlyPerf[key].total += d.arr_flights;
-        monthlyPerf[key].onTime += (d.arr_flights - d.arr_del15);
-    });
-
-    const sortedKeys = Object.keys(monthlyPerf).sort();
-    const labels = sortedKeys.map(key => {
-        const [year, month] = key.split('-');
-        return `${year}-${month}`;
-    });
-    const perfData = sortedKeys.map(key => {
-        const data = monthlyPerf[key];
-        return data.total > 0 ? (data.onTime / data.total) * 100 : 0;
-    });
-
-    charts.performanceTrend.data.labels = labels;
-    charts.performanceTrend.data.datasets[0].data = perfData;
-    charts.performanceTrend.update();
-}
-
-function createCarrierComparisonChart() {
-    const ctx = document.getElementById('carrierComparisonChart').getContext('2d');
-    charts.carrierComparison = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'On-Time Performance (%)',
-                data: [],
-                backgroundColor: chartColors.slice(0, 10)
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: false
-                }
-            },
-            scales: {
+                },
                 y: {
-                    beginAtZero: true,
-                    max: 100,
                     title: {
                         display: true,
-                        text: 'On-Time Performance (%)'
-                    }
+                        text: 'Delay Minutes'
+                    },
+                    beginAtZero: true
                 }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            },
+            animation: {
+                duration: 1500,
+                easing: 'easeInOutQuart'
             }
         }
     });
 }
 
-function updateCarrierComparisonChart() {
-    const carrierPerf = {};
-
-    filteredData.forEach(d => {
-        if (!carrierPerf[d.carrier]) {
-            carrierPerf[d.carrier] = {
-                total: 0,
-                onTime: 0
+function aggregateDelayTrends(data) {
+    const monthlyData = {};
+    
+    data.forEach(record => {
+        if (!monthlyData[record.month]) {
+            monthlyData[record.month] = {
+                carrier_delay: 0,
+                weather_delay: 0,
+                nas_delay: 0,
+                security_delay: 0,
+                late_aircraft_delay: 0,
+                count: 0
             };
         }
-        carrierPerf[d.carrier].total += d.arr_flights;
-        carrierPerf[d.carrier].onTime += (d.arr_flights - d.arr_del15);
-    });
-
-    const sortedCarriers = Object.entries(carrierPerf)
-        .filter(([,data]) => data.total >= 100) // Only include carriers with significant volume
-        .map(([carrier, data]) => [
-            carrier,
-            data.total > 0 ? (data.onTime / data.total) * 100 : 0
-        ])
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 10);
-
-    charts.carrierComparison.data.labels = sortedCarriers.map(([carrier]) => carrier);
-    charts.carrierComparison.data.datasets[0].data = sortedCarriers.map(([,perf]) => perf.toFixed(1));
-    charts.carrierComparison.update();
-}
-
-function updateRecommendations() {
-    const recommendationsList = document.getElementById('recommendationsList');
-    const recommendations = generateRecommendations();
-    
-    recommendationsList.innerHTML = recommendations.map(rec => `
-        <div class="recommendation-item">
-            <div class="recommendation-priority priority-${rec.priority}">${rec.priority.toUpperCase()}</div>
-            <h5>${rec.title}</h5>
-            <p>${rec.description}</p>
-        </div>
-    `).join('');
-}
-
-function generateRecommendations() {
-    const recommendations = [];
-    
-    // Analyze data for recommendations
-    const totalFlights = filteredData.reduce((sum, d) => sum + d.arr_flights, 0);
-    const totalDelayed = filteredData.reduce((sum, d) => sum + d.arr_del15, 0);
-    const delayRate = totalFlights > 0 ? (totalDelayed / totalFlights) * 100 : 0;
-    
-    if (delayRate > 20) {
-        recommendations.push({
-            priority: 'high',
-            title: 'Critical Delay Management',
-            description: `Current delay rate is ${delayRate.toFixed(1)}%. Immediate action required to improve operations.`
-        });
-    }
-    
-    // Weather delay analysis
-    const weatherDelays = filteredData.reduce((sum, d) => sum + (d.weather_delay || 0), 0);
-    const totalDelayMinutes = filteredData.reduce((sum, d) => sum + (d.arr_delay || 0), 0);
-    const weatherPercent = totalDelayMinutes > 0 ? (weatherDelays / totalDelayMinutes) * 100 : 0;
-    
-    if (weatherPercent > 30) {
-        recommendations.push({
-            priority: 'medium',
-            title: 'Weather Contingency Planning',
-            description: `Weather accounts for ${weatherPercent.toFixed(1)}% of delays. Consider enhanced weather monitoring systems.`
-        });
-    }
-    
-    // Carrier performance
-    recommendations.push({
-        priority: 'low',
-        title: 'Staff Optimization',
-        description: 'Based on current traffic patterns, consider adjusting staffing levels during peak hours.'
+        
+        monthlyData[record.month].carrier_delay += record.carrier_delay || 0;
+        monthlyData[record.month].weather_delay += record.weather_delay || 0;
+        monthlyData[record.month].nas_delay += record.nas_delay || 0;
+        monthlyData[record.month].security_delay += record.security_delay || 0;
+        monthlyData[record.month].late_aircraft_delay += record.late_aircraft_delay || 0;
+        monthlyData[record.month].count++;
     });
     
-    return recommendations;
+    const months = Object.keys(monthlyData).sort((a, b) => a - b).map(m => monthNames[m - 1]);
+    const sortedData = Object.keys(monthlyData).sort((a, b) => a - b).map(month => monthlyData[month]);
+    
+    return {
+        months,
+        carrier_delay: sortedData.map(d => d.carrier_delay),
+        weather_delay: sortedData.map(d => d.weather_delay),
+        nas_delay: sortedData.map(d => d.nas_delay),
+        security_delay: sortedData.map(d => d.security_delay),
+        late_aircraft_delay: sortedData.map(d => d.late_aircraft_delay)
+    };
 }
 
-function exportData() {
-    const csvContent = convertToCSV(filteredData);
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    
-    if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'filtered_airline_data.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+function updatePredictiveAnalytics() {
+    const riskScore = calculateRiskScore();
+    updateRiskGauge(riskScore);
+    updateRecommendations(riskScore);
 }
 
-function convertToCSV(data) {
-    if (data.length === 0) return '';
+function calculateRiskScore() {
+    if (filteredData.length === 0) return 0;
     
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-        headers.join(','),
-        ...data.map(row => headers.map(header => row[header]).join(','))
-    ].join('\n');
+    const avgDelayRatio = filteredData.reduce((sum, record) => sum + record.delay_ratio, 0) / filteredData.length;
+    const avgCancellationRate = filteredData.reduce((sum, record) => sum + record.arr_cancelled, 0) / 
+                               filteredData.reduce((sum, record) => sum + record.arr_flights, 0);
     
-    return csvContent;
+    // Simple risk calculation based on delay ratio and cancellation rate
+    const riskScore = Math.min(((avgDelayRatio * 0.7) + (avgCancellationRate * 0.3)) * 100, 100);
+    
+    return Math.round(riskScore);
 }
 
-function showLoading(show) {
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const mainContent = document.querySelector('.tab-content');
+function updateRiskGauge(riskScore) {
+    const canvas = document.getElementById('riskGauge');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 80;
     
-    if (show) {
-        loadingIndicator.classList.remove('hidden');
-        mainContent.style.opacity = '0.5';
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw background arc
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI);
+    ctx.lineWidth = 20;
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.stroke();
+    
+    // Draw risk arc
+    const riskAngle = Math.PI + (Math.PI * riskScore / 100);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, Math.PI, riskAngle);
+    ctx.lineWidth = 20;
+    
+    // Color based on risk level
+    if (riskScore < 30) {
+        ctx.strokeStyle = '#4CAF50';
+    } else if (riskScore < 70) {
+        ctx.strokeStyle = '#FF9800';
     } else {
-        loadingIndicator.classList.add('hidden');
-        mainContent.style.opacity = '1';
+        ctx.strokeStyle = '#F44336';
+    }
+    
+    ctx.stroke();
+    
+    // Update risk score text
+    document.getElementById('riskScore').textContent = riskScore + '%';
+    
+    // Update risk assessment text
+    let assessment = '';
+    if (riskScore < 30) {
+        assessment = 'Low risk of delays. Operations running smoothly.';
+    } else if (riskScore < 70) {
+        assessment = 'Moderate risk of delays. Monitor closely and prepare contingencies.';
+    } else {
+        assessment = 'High risk of delays. Immediate attention and resource allocation needed.';
+    }
+    
+    document.getElementById('riskAssessment').textContent = assessment;
+}
+
+function updateRecommendations(riskScore) {
+    const staffingElement = document.getElementById('staffingRec');
+    const gateElement = document.getElementById('gateRec');
+    const peakHoursElement = document.getElementById('peakHoursRec');
+    
+    if (riskScore < 30) {
+        staffingElement.textContent = 'Normal staffing levels sufficient. Consider training opportunities.';
+        gateElement.textContent = 'Standard gate allocation. Monitor for efficiency improvements.';
+        peakHoursElement.textContent = 'Low delay periods. Focus on maintenance and optimization.';
+    } else if (riskScore < 70) {
+        staffingElement.textContent = 'Increase staffing by 15-20% during peak hours.';
+        gateElement.textContent = 'Optimize gate assignments and prepare backup gates.';
+        peakHoursElement.textContent = 'Monitor 7-9 AM and 5-7 PM for potential delays.';
+    } else {
+        staffingElement.textContent = 'Deploy additional staff immediately. Consider overtime authorization.';
+        gateElement.textContent = 'Activate all available gates and implement priority boarding.';
+        peakHoursElement.textContent = 'High delay risk throughout the day. Implement delay management protocols.';
     }
 }
 
-function showError(message) {
-    const mainContent = document.querySelector('.main-content');
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.textContent = message;
-    mainContent.insertBefore(errorDiv, mainContent.firstChild);
+function updateTimestamps() {
+    const now = new Date();
+    const timestamp = now.toLocaleString();
+    
+    document.getElementById('lastUpdated').textContent = timestamp;
+    document.getElementById('footerTimestamp').textContent = timestamp;
+    
+    // Update every minute
+    setTimeout(updateTimestamps, 60000);
 }
+
+// Utility functions
+function formatNumber(num) {
+    return num.toLocaleString();
+}
+
+function formatPercentage(num) {
+    return (num * 100).toFixed(1) + '%';
+}
+
+// Export functions for potential external use
+window.dashboardAPI = {
+    updateDashboard,
+    applyFilters,
+    resetFilters,
+    getFilteredData: () => filteredData,
+    getCharts: () => charts
+};
